@@ -1,21 +1,18 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/chat");
+  }, [router]);
+
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-8">
-      <div className="space-y-8">
-        <h1 className="text-white text-4xl font-bold text-center">
-          Testing HeroUI Button
-        </h1>
-        
-        <div className="flex gap-4 justify-center">
-          <Button color="primary">Primary Button</Button>
-          <Button color="secondary" variant="bordered">Bordered Button</Button>
-          <Button color="success" variant="shadow">Shadow Button</Button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <p className="text-white">Redirecting to chat...</p>
     </div>
   );
 }
