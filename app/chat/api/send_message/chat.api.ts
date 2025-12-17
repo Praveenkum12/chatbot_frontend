@@ -8,7 +8,7 @@ import { ChatResponse, parseChatResponse } from "./chat-response.schema";
  * @returns The AI response as a string
  * @throws Error if the request fails
  */
-export const sendMessage = async (message: string): Promise<ChatResponse> => {
+export const chatApi = async (message: string): Promise<ChatResponse> => {
   try {
     // Validate and create request
     const request: ChatRequest = createChatRequest(message);
@@ -24,7 +24,11 @@ export const sendMessage = async (message: string): Promise<ChatResponse> => {
 
     // Check if request was successful
     if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
+      const errorText = await response.text();
+      console.error("API Error Response:", errorText);
+      throw new Error(
+        `API request failed with status ${response.status}: ${errorText}`
+      );
     }
 
     // Parse response text

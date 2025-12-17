@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Button, Select, SelectItem } from "@heroui/react";
 import { useChatStore } from "./store/chat.store";
+import { ChatController } from "./controller/chat.controller";
 
 export default function ChatPage() {
   const { 
@@ -10,26 +11,37 @@ export default function ChatPage() {
     models, 
     selectedModelKey, 
     inputValue, 
-    addMessage, 
     setInputValue, 
     setSelectedModelKey 
   } = useChatStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Auto-focus on load
   useEffect(() => {
     textareaRef.current?.focus();
   }, []);
 
-  const handleSend = () => {
-    if (inputValue.trim()) {
-      addMessage("human", inputValue);
+  const handleSend = async () => {
+    if (inputValue.trim() && !isLoading) {
+      const messageToSend = inputValue;
       setInputValue("");
+      setIsLoading(true);
+      
       // Reset textarea height
       if (textareaRef.current) {
         textareaRef.current.style.height = 'auto';
       }
-      setTimeout(() => textareaRef.current?.focus(), 0);
+
+      try {
+        // Call the controller which handles both store updates and API call
+        await ChatController.sendMessage(messageToSend);
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      } finally {
+        setIsLoading(false);
+        setTimeout(() => textareaRef.current?.focus(), 0);
+      }
     }
   };
 
@@ -130,8 +142,10 @@ export default function ChatPage() {
               color="primary" 
               className="px-6 bg-blue-600 hover:bg-blue-700 font-medium flex-shrink-0"
               size="md"
+              isLoading={isLoading}
+              isDisabled={isLoading || !inputValue.trim()}
             >
-              Send
+              {isLoading ? "Sending..." : "Send"}
             </Button>
           </div>
         </div>
