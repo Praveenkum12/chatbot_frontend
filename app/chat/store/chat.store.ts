@@ -1,16 +1,18 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { Message, createMessage } from "../schemas/message.schema";
+import { Model, AVAILABLE_MODELS } from "../schemas/model.schema";
 
 interface ChatStore {
   messages: Message[];
-  selectedModel: string;
+  models: Model[];
+  selectedModelKey: string;
   inputValue: string;
 
   // Actions
   addMessage: (role: "human" | "ai", content: string) => void;
   setInputValue: (value: string) => void;
-  setSelectedModel: (model: string) => void;
+  setSelectedModelKey: (key: string) => void;
   clearMessages: () => void;
 }
 
@@ -18,7 +20,8 @@ export const useChatStore = create<ChatStore>()(
   persist(
     (set) => ({
       messages: [],
-      selectedModel: "gpt-4 nano",
+      models: AVAILABLE_MODELS,
+      selectedModelKey: AVAILABLE_MODELS[0].key, // Default to first model (001)
       inputValue: "",
 
       addMessage: (role, content) =>
@@ -28,7 +31,7 @@ export const useChatStore = create<ChatStore>()(
 
       setInputValue: (value) => set({ inputValue: value }),
 
-      setSelectedModel: (model) => set({ selectedModel: model }),
+      setSelectedModelKey: (key) => set({ selectedModelKey: key }),
 
       clearMessages: () => set({ messages: [] }),
     }),
@@ -45,7 +48,7 @@ export const useChatStore = create<ChatStore>()(
       }),
       partialize: (state) => ({
         messages: state.messages,
-        selectedModel: state.selectedModel,
+        selectedModelKey: state.selectedModelKey,
       }),
     }
   )

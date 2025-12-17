@@ -4,14 +4,16 @@ import { useRef, useEffect } from "react";
 import { Button, Select, SelectItem } from "@heroui/react";
 import { useChatStore } from "./store/chat.store";
 
-const models = [
-  { key: "gpt-4 nano", label: "GPT-4 nano" },
-  { key: "gpt-3.5", label: "GPT-3.5 Turbo" },
-  { key: "claude", label: "Claude 3" },
-];
-
 export default function ChatPage() {
-  const { messages, selectedModel, inputValue, addMessage, setInputValue, setSelectedModel } = useChatStore();
+  const { 
+    messages, 
+    models, 
+    selectedModelKey, 
+    inputValue, 
+    addMessage, 
+    setInputValue, 
+    setSelectedModelKey 
+  } = useChatStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-focus on load
@@ -56,8 +58,8 @@ export default function ChatPage() {
           size="sm"
           placeholder="Select model"
           className="w-48"
-          defaultSelectedKeys={[selectedModel]}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedModel(e.target.value)}
+          selectedKeys={[selectedModelKey]}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedModelKey(e.target.value)}
         >
           {models.map((model) => (
             <SelectItem key={model.key} value={model.key}>
