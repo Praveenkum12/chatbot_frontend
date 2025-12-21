@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import { Button, Select, SelectItem } from "@heroui/react";
 import { useChatStore } from "./store/chat.store";
 import { ChatController } from "./controller/chat.controller";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function ChatPage() {
   const { 
@@ -90,9 +91,14 @@ export default function ChatPage() {
       }
 
       try {
-        // Call the controller which handles both store updates and API call
-        // Use web search endpoint if turbo mode is enabled
-        await ChatController.sendMessage(messageToSend, turboMode);
+        // Use Ollama API for Llama model, regular API for GPT
+        if (selectedModelKey === "002") {
+          // Llama model
+          await ChatController.sendMessageToOllama(messageToSend);
+        } else {
+          // GPT model - use web search endpoint if turbo mode is enabled
+          await ChatController.sendMessage(messageToSend, turboMode);
+        }
       } catch (error) {
         console.error("Failed to send message:", error);
       } finally {
@@ -147,7 +153,9 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex">
+    <>
+      <Toaster />
+      <div className="min-h-screen bg-[#0A0A0A] flex">
       {/* Sidebar - Only show for GPT-4 Nano (001) */}
       {selectedModelKey === "001" && (
         <aside
@@ -274,6 +282,35 @@ export default function ChatPage() {
           </div>
           
           <div className="flex items-center gap-5">
+            {/* Clear Chat Button - Only for Llama */}
+            {selectedModelKey === "002" && messages.length > 0 && (
+              <button
+                onClick={() => {
+                  clearMessages();
+                  toast.success("Chat cleared", {
+                    duration: 2000,
+                    position: "top-right",
+                  });
+                }}
+                className="p-2 hover:bg-red-600/20 rounded-lg transition-colors group"
+                aria-label="Clear chat"
+                title="Clear all messages"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-red-400 group-hover:text-red-300"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+            )}
+            
             {/* Turbo Mode Toggle - Shows when GPT-4 Nano is selected */}
             {selectedModelKey === "001" && (
               <div className="flex items-center gap-3">
@@ -361,6 +398,25 @@ export default function ChatPage() {
                 )}
               </div>
             ))}
+            
+            {/* Typing Indicator - Shows when loading */}
+            {isLoading && (
+              <div className="flex gap-3 justify-start">
+                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                  AI
+                </div>
+                <div className="max-w-[70%]">
+                  <div className="rounded-2xl px-4 py-3 bg-white/5 border border-white/10 rounded-tl-sm backdrop-blur-xl">
+                    <div className="flex gap-1 items-center">
+                      <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></span>
+                      <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></span>
+                      <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Invisible div for scroll target */}
             <div ref={messagesEndRef} />
           </div>
@@ -399,15 +455,15 @@ export default function ChatPage() {
                     : "bg-blue-600 hover:bg-blue-700"
                 }`}
                 size="md"
-                isLoading={isLoading}
                 isDisabled={isLoading || !inputValue.trim()}
               >
-                {isLoading ? "Sending..." : "Send"}
+                Send
               </Button>
             </div>
           </div>
         </div>
       </div>
     </div>
+    </>
   );
 }

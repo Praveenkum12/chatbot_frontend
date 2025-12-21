@@ -1,8 +1,10 @@
 import { chatApi } from "../api/send_message/chat.api";
 import { getHistoryApi } from "../api/get_history/history.api";
 import { getChatsById } from "../api/get_chats_by_id/chats-by-id.api";
+import { sendMessageToOllama } from "../api/ollama/ollama.api";
 import { HistoryResponse } from "../api/get_history/history-response.schema";
 import { useChatStore } from "../store/chat.store";
+import toast from "react-hot-toast";
 
 /**
  * Chat Controller
@@ -68,6 +70,42 @@ export class ChatController {
       console.error("Failed to send message:", error);
       // Add error message to store
       addMessage("ai", "Sorry, I encountered an error. Please try again.");
+      throw error;
+    }
+  }
+
+  /**
+   * Send a message to Ollama (Llama model)
+   * @param message - User's message
+   */
+  static async sendMessageToOllama(message: string): Promise<void> {
+    const { addMessage } = useChatStore.getState();
+
+    try {
+      // Add user message to store
+      addMessage("human", message);
+
+      // Call Ollama API
+      const aiResponse = await sendMessageToOllama(message);
+
+      // Check if response indicates RAM full
+      if (aiResponse.toLowerCase().includes("ram full")) {
+        // Show toast notification for 5 seconds (don't add error message to chat)
+        toast.error("Server resources unavailable - Try again later", {
+          duration: 5000,
+          position: "top-right",
+        });
+      } else {
+        // Normal response
+        addMessage("ai", aiResponse);
+      }
+    } catch (error) {
+      console.error("Failed to send message to Ollama:", error);
+      // Show toast for actual errors
+      toast.error("Failed to send message", {
+        duration: 5000,
+        position: "top-right",
+      });
       throw error;
     }
   }
