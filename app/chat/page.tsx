@@ -65,7 +65,7 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
       {/* Top Bar */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-[#111111] border-b border-[#222222] flex items-center justify-between px-6 z-50">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-black/30 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-6 z-50">
         <h1 className="text-xl font-bold text-white">AI Chat</h1>
         
         <div className="flex items-center gap-5">
@@ -150,10 +150,10 @@ export default function ChatPage() {
                     </span>
                   </div>
                 )}
-                <div className={`rounded-2xl px-4 py-3 ${
+                <div className={`rounded-2xl px-4 py-3 backdrop-blur-md ${
                   message.role === "human"
-                    ? "bg-blue-600 text-white rounded-tr-sm"
-                    : "bg-[#1a1a1a] text-gray-200 border border-[#222222] rounded-tl-sm"
+                    ? "bg-blue-600/90 text-white rounded-tr-sm shadow-lg shadow-blue-600/20"
+                    : "bg-white/5 text-gray-200 border border-white/10 rounded-tl-sm backdrop-blur-xl"
                 }`}>
                   <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
                 </div>
@@ -172,7 +172,7 @@ export default function ChatPage() {
       {/* Input Area */}
       <div className="fixed bottom-0 left-0 right-0 p-4 z-40">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-[#1a1a1a] border-2 border-[#333333] rounded-xl px-4 py-3 flex gap-3 items-end focus-within:border-blue-600 transition-colors">
+          <div className="bg-white/5 backdrop-blur-xl border-2 border-white/10 rounded-xl px-4 py-3 flex gap-3 items-end focus-within:border-blue-500/50 transition-all shadow-2xl">
             <textarea
               ref={textareaRef}
               value={inputValue}
