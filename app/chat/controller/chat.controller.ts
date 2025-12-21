@@ -1,5 +1,6 @@
 import { chatApi } from "../api/send_message/chat.api";
 import { getHistoryApi } from "../api/get_history/history.api";
+import { getChatsById } from "../api/get_chats_by_id/chats-by-id.api";
 import { HistoryResponse } from "../api/get_history/history-response.schema";
 import { useChatStore } from "../store/chat.store";
 
@@ -49,6 +50,32 @@ export class ChatController {
       return history;
     } catch (error) {
       console.error("Failed to fetch history:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get chat messages by conversation ID
+   * Fetches all messages for a specific conversation and loads them into the store
+   * @param conversationId - The ID of the conversation to load
+   */
+  static async getChatMessages(conversationId: string): Promise<void> {
+    const { clearMessages, addMessage } = useChatStore.getState();
+
+    try {
+      // Clear existing messages before loading new ones
+      clearMessages();
+
+      // Fetch messages from API
+      const messages = await getChatsById(conversationId);
+
+      // Add messages to store in order
+      messages.forEach((msg) => {
+        const role = msg.type === "USER" ? "human" : "ai";
+        addMessage(role, msg.content);
+      });
+    } catch (error) {
+      console.error("Failed to load chat messages:", error);
       throw error;
     }
   }

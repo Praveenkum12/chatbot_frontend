@@ -102,6 +102,23 @@ export default function ChatPage() {
     textareaRef.current?.focus();
   };
 
+  const handleHistoryClick = async (conversationId: string) => {
+    // Set the selected conversation
+    setSelectedConversationId(conversationId);
+    
+    // Set loading state
+    setIsLoading(true);
+    
+    try {
+      // Load the messages for this conversation
+      await ChatController.getChatMessages(conversationId);
+    } catch (error) {
+      console.error("Failed to load conversation:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex">
       {/* Sidebar */}
@@ -172,7 +189,7 @@ export default function ChatPage() {
               history.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setSelectedConversationId(item.id)}
+                  onClick={() => handleHistoryClick(item.id)}
                   className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
                     selectedConversationId === item.id
                       ? "bg-gradient-to-r from-blue-600/30 to-blue-500/20 border-blue-500/50 shadow-lg shadow-blue-500/20"
