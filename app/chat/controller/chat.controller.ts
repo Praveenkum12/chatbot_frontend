@@ -10,16 +10,20 @@ export class ChatController {
    * Send a message and get AI response
    * Adds user message to store, calls API, and adds AI response to store
    * @param message - User's message
+   * @param turboMode - Whether to use web search (turbo mode)
    */
-  static async sendMessage(message: string): Promise<void> {
+  static async sendMessage(
+    message: string,
+    turboMode: boolean = false
+  ): Promise<void> {
     const { addMessage } = useChatStore.getState();
 
     try {
       // Add user message to store
       addMessage("human", message);
 
-      // Call the API and get AI response
-      const aiResponse = await chatApi(message);
+      // Call the API and get AI response (with web search if turbo mode is on)
+      const aiResponse = await chatApi(message, turboMode);
 
       // Add AI response to store
       addMessage("ai", aiResponse);

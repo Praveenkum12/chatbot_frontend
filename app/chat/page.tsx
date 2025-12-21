@@ -24,6 +24,13 @@ export default function ChatPage() {
     textareaRef.current?.focus();
   }, []);
 
+  // Auto-disable turbo mode when switching away from GPT-4 Nano
+  useEffect(() => {
+    if (selectedModelKey !== "001" && turboMode) {
+      setTurboMode(false);
+    }
+  }, [selectedModelKey, turboMode, setTurboMode]);
+
   const handleSend = async () => {
     if (inputValue.trim() && !isLoading) {
       const messageToSend = inputValue;
@@ -37,7 +44,8 @@ export default function ChatPage() {
 
       try {
         // Call the controller which handles both store updates and API call
-        await ChatController.sendMessage(messageToSend);
+        // Use web search endpoint if turbo mode is enabled
+        await ChatController.sendMessage(messageToSend, turboMode);
       } catch (error) {
         console.error("Failed to send message:", error);
       } finally {
@@ -172,7 +180,11 @@ export default function ChatPage() {
       {/* Input Area */}
       <div className="fixed bottom-0 left-0 right-0 p-4 z-40">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white/5 backdrop-blur-xl border-2 border-white/10 rounded-xl px-4 py-3 flex gap-3 items-end focus-within:border-blue-500/50 transition-all shadow-2xl">
+          <div className={`backdrop-blur-xl border-2 rounded-xl px-4 py-3 flex gap-3 items-end transition-all shadow-2xl ${
+            turboMode
+              ? "bg-white/5 border-yellow-400/60 focus-within:border-yellow-400"
+              : "bg-white/5 border-white/10 focus-within:border-blue-500/50"
+          }`}>
             <textarea
               ref={textareaRef}
               value={inputValue}
@@ -190,7 +202,11 @@ export default function ChatPage() {
             <Button 
               onClick={handleSend}
               color="primary" 
-              className="px-6 bg-blue-600 hover:bg-blue-700 font-medium flex-shrink-0"
+              className={`px-6 font-medium flex-shrink-0 transition-all ${
+                turboMode
+                  ? "bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black shadow-lg shadow-yellow-500/60"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
               size="md"
               isLoading={isLoading}
               isDisabled={isLoading || !inputValue.trim()}
