@@ -132,7 +132,7 @@ export default function ChatPage() {
       </header>
 
       {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto p-6 pt-20">
+      <main className="flex-1 overflow-y-auto p-6 pt-20 pb-32">
         <div className="w-full mx-auto space-y-4">
           {messages.map((message) => (
             <div key={message.id} className={`flex gap-3 ${message.role === "human" ? "justify-end" : "justify-start"}`}>
@@ -170,7 +170,7 @@ export default function ChatPage() {
       </main>
 
       {/* Input Area */}
-      <div className="border-t border-[#222222] bg-[#111111] p-4">
+      <div className="fixed bottom-0 left-0 right-0 p-4 z-40">
         <div className="max-w-6xl mx-auto">
           <div className="bg-[#1a1a1a] border-2 border-[#333333] rounded-xl px-4 py-3 flex gap-3 items-end focus-within:border-blue-600 transition-colors">
             <textarea
