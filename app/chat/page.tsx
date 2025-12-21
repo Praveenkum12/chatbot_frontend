@@ -26,6 +26,7 @@ export default function ChatPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   // Scroll to bottom of messages
@@ -112,19 +113,22 @@ export default function ChatPage() {
     // Set the selected conversation
     setSelectedConversationId(conversationId);
     
-    // Set loading state
-    setIsLoading(true);
+    // Set loading state (separate from send button loading)
+    setIsLoadingHistory(true);
     
     try {
       // Load the messages for this conversation
       await ChatController.getChatMessages(conversationId);
       
       // Scroll to bottom after messages are loaded
-      setTimeout(() => scrollToBottom(), 100);
+      setTimeout(() => {
+        scrollToBottom();
+        textareaRef.current?.focus();
+      }, 100);
     } catch (error) {
       console.error("Failed to load conversation:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingHistory(false);
     }
   };
 
