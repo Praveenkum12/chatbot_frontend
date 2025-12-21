@@ -19,8 +19,12 @@ export class ChatController {
     message: string,
     turboMode: boolean = false
   ): Promise<void> {
-    const { addMessage, selectedConversationId, setSelectedConversationId } =
-      useChatStore.getState();
+    const {
+      addMessage,
+      selectedConversationId,
+      setSelectedConversationId,
+      setHistory,
+    } = useChatStore.getState();
 
     try {
       // Add user message to store
@@ -36,9 +40,29 @@ export class ChatController {
       // Add AI response to store (extract only the message content)
       addMessage("ai", aiResponse.message);
 
-      // If this was a new conversation, store the conversation ID
+      // Debug logging
+      console.log("=== New Conversation Check ===");
+      console.log("selectedConversationId:", selectedConversationId);
+      console.log("aiResponse.conversation_id:", aiResponse.conversation_id);
+      console.log(
+        "Should refresh history:",
+        !selectedConversationId && aiResponse.conversation_id
+      );
+
+      // If this was a new conversation, store the conversation ID and refresh history
       if (!selectedConversationId && aiResponse.conversation_id) {
+        console.log("✅ Creating new conversation, refreshing history...");
         setSelectedConversationId(aiResponse.conversation_id);
+
+        // Refresh history to show the new conversation in the sidebar
+        try {
+          const updatedHistory = await this.getHistory();
+          setHistory(updatedHistory);
+          console.log("✅ History refreshed successfully");
+        } catch (error) {
+          console.error("Failed to refresh history:", error);
+          // Don't throw - conversation was created successfully
+        }
       }
     } catch (error) {
       console.error("Failed to send message:", error);
