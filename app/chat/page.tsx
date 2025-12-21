@@ -64,6 +64,11 @@ export default function ChatPage() {
     }
   }, [selectedModelKey, turboMode, setTurboMode]);
 
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const handleSend = async () => {
     if (inputValue.trim() && !isLoading) {
       const messageToSend = inputValue;

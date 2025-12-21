@@ -6,16 +6,18 @@ import { ChatResponse, parseChatResponse } from "./chat-response.schema";
  * Send a message to the OpenAI chat API
  * @param message - The message to send
  * @param turboMode - Whether to use web search endpoint (turbo mode)
- * @returns The AI response as a string
+ * @param conversationId - Optional conversation ID (null for new conversation)
+ * @returns The AI response with conversation ID
  * @throws Error if the request fails
  */
 export const chatApi = async (
   message: string,
-  turboMode: boolean = false
+  turboMode: boolean = false,
+  conversationId: string | null = null
 ): Promise<ChatResponse> => {
   try {
-    // Validate and create request
-    const request: ChatRequest = createChatRequest(message);
+    // Validate and create request with conversation ID
+    const request: ChatRequest = createChatRequest(message, conversationId);
 
     // Choose endpoint based on turbo mode
     const endpoint = turboMode ? "/openai/web-search" : "/openai/chat";
