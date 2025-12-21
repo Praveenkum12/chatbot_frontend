@@ -24,8 +24,14 @@ export default function ChatPage() {
     clearMessages
   } = useChatStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Scroll to bottom of messages
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   // Auto-focus on load
   useEffect(() => {
@@ -112,6 +118,9 @@ export default function ChatPage() {
     try {
       // Load the messages for this conversation
       await ChatController.getChatMessages(conversationId);
+      
+      // Scroll to bottom after messages are loaded
+      setTimeout(() => scrollToBottom(), 100);
     } catch (error) {
       console.error("Failed to load conversation:", error);
     } finally {
@@ -330,6 +339,8 @@ export default function ChatPage() {
                 )}
               </div>
             ))}
+            {/* Invisible div for scroll target */}
+            <div ref={messagesEndRef} />
           </div>
         </main>
 
