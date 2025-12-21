@@ -8,11 +8,13 @@ interface ChatStore {
   models: Model[];
   selectedModelKey: string;
   inputValue: string;
+  turboMode: boolean;
 
   // Actions
   addMessage: (role: "human" | "ai", content: string) => void;
   setInputValue: (value: string) => void;
   setSelectedModelKey: (key: string) => void;
+  setTurboMode: (enabled: boolean) => void;
   clearMessages: () => void;
 }
 
@@ -23,6 +25,7 @@ export const useChatStore = create<ChatStore>()(
       models: AVAILABLE_MODELS,
       selectedModelKey: AVAILABLE_MODELS[0].key, // Default to first model (001)
       inputValue: "",
+      turboMode: false,
 
       addMessage: (role, content) =>
         set((state) => ({
@@ -32,6 +35,8 @@ export const useChatStore = create<ChatStore>()(
       setInputValue: (value) => set({ inputValue: value }),
 
       setSelectedModelKey: (key) => set({ selectedModelKey: key }),
+
+      setTurboMode: (enabled) => set({ turboMode: enabled }),
 
       clearMessages: () => set({ messages: [] }),
     }),
@@ -49,6 +54,7 @@ export const useChatStore = create<ChatStore>()(
       partialize: (state) => ({
         messages: state.messages,
         selectedModelKey: state.selectedModelKey,
+        turboMode: state.turboMode,
       }),
     }
   )

@@ -11,8 +11,10 @@ export default function ChatPage() {
     models, 
     selectedModelKey, 
     inputValue, 
+    turboMode,
     setInputValue, 
-    setSelectedModelKey 
+    setSelectedModelKey,
+    setTurboMode
   } = useChatStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,27 +65,75 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
       {/* Top Bar */}
-      <header className="h-16 bg-[#111111] border-b border-[#222222] flex items-center justify-between px-6">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-[#111111] border-b border-[#222222] flex items-center justify-between px-6 z-50">
         <h1 className="text-xl font-bold text-white">AI Chat</h1>
         
-        <Select
-          size="sm"
-          placeholder="Select model"
-          className="w-48"
-          selectedKeys={[selectedModelKey]}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedModelKey(e.target.value)}
-        >
-          {models.map((model) => (
-            <SelectItem key={model.key} value={model.key}>
-              {model.label}
-            </SelectItem>
-          ))}
-        </Select>
+        <div className="flex items-center gap-5">
+
+    {/* Turbo Mode Toggle - Shows when GPT-4 Nano is selected */}
+          {selectedModelKey === "001" && (
+            <div className="flex items-center gap-3">
+              {/* Toggle Switch */}
+              <button
+                onClick={() => setTurboMode(!turboMode)}
+                className={`relative inline-flex h-8 w-16 items-center rounded-full transition-all duration-300 ${
+                  turboMode
+                    ? "bg-gradient-to-r from-yellow-400 to-amber-500 shadow-lg shadow-yellow-500/50"
+                    : "bg-gray-700 hover:bg-gray-600"
+                }`}
+                role="switch"
+                aria-checked={turboMode}
+              >
+                {/* Sliding Knob */}
+                <span
+                  className={`h-6 w-6 transform rounded-full bg-white transition-transform duration-300 flex items-center justify-center ${
+                    turboMode ? "translate-x-9" : "translate-x-1"
+                  }`}
+                >
+                  {/* Lightning icon inside knob */}
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className={`h-5 w-5 transition-all duration-300 ${
+                      turboMode ? "text-amber-500" : "text-gray-400"
+                    }`}
+                    viewBox="0 0 24 24" 
+                    fill="currentColor"
+                  >
+                    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </span>
+              </button>
+              
+              {/* TURBO Label */}
+              {/* <span className={`font-bold text-sm transition-colors duration-300 ${
+                turboMode ? "text-yellow-400" : "text-gray-400"
+              }`}>
+                TURBO
+              </span> */}
+            </div>
+          )}
+
+          <Select
+            size="sm"
+            placeholder="Select model"
+            className="w-48"
+            selectedKeys={[selectedModelKey]}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedModelKey(e.target.value)}
+          >
+            {models.map((model) => (
+              <SelectItem key={model.key} >
+                {model.label}
+              </SelectItem>
+            ))}
+          </Select>
+          
+      
+        </div>
       </header>
 
       {/* Messages Area */}
-      <main className="flex-1 overflow-y-auto p-6">
-        <div className="max-w-4xl mx-auto space-y-4">
+      <main className="flex-1 overflow-y-auto p-6 pt-20">
+        <div className="w-full mx-auto space-y-4">
           {messages.map((message) => (
             <div key={message.id} className={`flex gap-3 ${message.role === "human" ? "justify-end" : "justify-start"}`}>
               {message.role === "ai" && (
@@ -121,7 +171,7 @@ export default function ChatPage() {
 
       {/* Input Area */}
       <div className="border-t border-[#222222] bg-[#111111] p-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="bg-[#1a1a1a] border-2 border-[#333333] rounded-xl px-4 py-3 flex gap-3 items-end focus-within:border-blue-600 transition-colors">
             <textarea
               ref={textareaRef}
