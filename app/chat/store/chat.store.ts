@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { Message, createMessage } from "../schemas/message.schema";
 import { Model, AVAILABLE_MODELS } from "../schemas/model.schema";
+import { HistoryItem } from "../api/get_history/history-response.schema";
 
 interface ChatStore {
   messages: Message[];
@@ -9,6 +10,9 @@ interface ChatStore {
   selectedModelKey: string;
   inputValue: string;
   turboMode: boolean;
+  history: HistoryItem[];
+  isHistoryLoading: boolean;
+  selectedConversationId: string | null;
 
   // Actions
   addMessage: (role: "human" | "ai", content: string) => void;
@@ -16,6 +20,9 @@ interface ChatStore {
   setSelectedModelKey: (key: string) => void;
   setTurboMode: (enabled: boolean) => void;
   clearMessages: () => void;
+  setHistory: (history: HistoryItem[]) => void;
+  setIsHistoryLoading: (loading: boolean) => void;
+  setSelectedConversationId: (id: string | null) => void;
 }
 
 export const useChatStore = create<ChatStore>()(
@@ -26,6 +33,9 @@ export const useChatStore = create<ChatStore>()(
       selectedModelKey: AVAILABLE_MODELS[0].key, // Default to first model (001)
       inputValue: "",
       turboMode: false,
+      history: [],
+      isHistoryLoading: false,
+      selectedConversationId: null,
 
       addMessage: (role, content) =>
         set((state) => ({
@@ -39,6 +49,12 @@ export const useChatStore = create<ChatStore>()(
       setTurboMode: (enabled) => set({ turboMode: enabled }),
 
       clearMessages: () => set({ messages: [] }),
+
+      setHistory: (history) => set({ history }),
+
+      setIsHistoryLoading: (loading) => set({ isHistoryLoading: loading }),
+
+      setSelectedConversationId: (id) => set({ selectedConversationId: id }),
     }),
     {
       name: "chat-storage",
@@ -55,6 +71,7 @@ export const useChatStore = create<ChatStore>()(
         messages: state.messages,
         selectedModelKey: state.selectedModelKey,
         turboMode: state.turboMode,
+        selectedConversationId: state.selectedConversationId,
       }),
     }
   )
