@@ -64,6 +64,15 @@ export default function ChatPage() {
     }
   }, [selectedModelKey, turboMode, setTurboMode]);
 
+  // Clear messages and conversation ID when switching to Llama (no history support)
+  useEffect(() => {
+    if (selectedModelKey === "002") {
+      // Llama model - clear everything
+      clearMessages();
+      setSelectedConversationId(null);
+    }
+  }, [selectedModelKey, clearMessages, setSelectedConversationId]);
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     scrollToBottom();
@@ -139,103 +148,107 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex">
-      {/* Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 h-full bg-black/40 backdrop-blur-xl border-r border-white/10 transition-all duration-300 z-40 ${
-          isSidebarOpen ? "w-72" : "w-0"
-        } overflow-hidden`}
-      >
-        <div className="flex flex-col h-full w-72">
-          {/* Sidebar Header */}
-          <div className="h-16 px-4 flex items-center justify-between border-b border-white/10">
-            <h2 className="text-lg font-bold text-white">Chat History</h2>
-            <div className="flex items-center gap-2">
-              {/* New Chat Button */}
-              <button
-                onClick={handleNewChat}
-                className="p-2 bg-blue-600/20 rounded-lg transition-colors group"
-                aria-label="New chat"
-                title="Start new conversation"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-blue-400 group-hover:text-blue-300"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+      {/* Sidebar - Only show for GPT-4 Nano (001) */}
+      {selectedModelKey === "001" && (
+        <aside
+          className={`fixed top-0 left-0 h-full bg-black/40 backdrop-blur-xl border-r border-white/10 transition-all duration-300 z-40 ${
+            isSidebarOpen ? "w-72" : "w-0"
+          } overflow-hidden`}
+        >
+          <div className="flex flex-col h-full w-72">
+            {/* Sidebar Header */}
+            <div className="h-16 px-4 flex items-center justify-between border-b border-white/10">
+              <h2 className="text-lg font-bold text-white">Chat History</h2>
+              <div className="flex items-center gap-2">
+                {/* New Chat Button */}
+                <button
+                  onClick={handleNewChat}
+                  className="p-2 bg-blue-600/20 rounded-lg transition-colors group"
+                  aria-label="New chat"
+                  title="Start new conversation"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-              
-              {/* Close Sidebar Button */}
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                aria-label="Close sidebar"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-gray-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-blue-400 group-hover:text-blue-300"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                
+                {/* Close Sidebar Button */}
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  aria-label="Close sidebar"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-gray-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* History List */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+              {isHistoryLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                </div>
+              ) : history.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 text-sm">
+                  No chat history yet
+                </div>
+              ) : (
+                history.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleHistoryClick(item.id)}
+                    className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
+                      selectedConversationId === item.id
+                        ? "bg-gradient-to-r from-blue-600/30 to-blue-500/20 border-blue-500/50 shadow-lg shadow-blue-500/20"
+                        : "bg-white/5 hover:bg-white/10 border-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <p className={`text-sm font-medium truncate transition-colors ${
+                      selectedConversationId === item.id
+                        ? "text-blue-300"
+                        : "text-white hover:text-blue-200"
+                    }`}>
+                      {item.title}
+                    </p>
+                  </button>
+                ))
+              )}
             </div>
           </div>
-
-          {/* History List */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
-            {isHistoryLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-              </div>
-            ) : history.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 text-sm">
-                No chat history yet
-              </div>
-            ) : (
-              history.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleHistoryClick(item.id)}
-                  className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
-                    selectedConversationId === item.id
-                      ? "bg-gradient-to-r from-blue-600/30 to-blue-500/20 border-blue-500/50 shadow-lg shadow-blue-500/20"
-                      : "bg-white/5 hover:bg-white/10 border-white/5 hover:border-white/20"
-                  }`}
-                >
-                  <p className={`text-sm font-medium truncate transition-colors ${
-                    selectedConversationId === item.id
-                      ? "text-blue-300"
-                      : "text-white hover:text-blue-200"
-                  }`}>
-                    {item.title}
-                  </p>
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-      </aside>
+        </aside>
+      )}
 
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? "ml-72" : "ml-0"}`}>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${
+        selectedModelKey === "001" && isSidebarOpen ? "ml-72" : "ml-0"
+      }`}>
         {/* Top Bar */}
         <header className="fixed top-0 right-0 h-16 bg-black/30 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-6 z-50"
-          style={{ left: isSidebarOpen ? '18rem' : '0' }}
+          style={{ left: selectedModelKey === "001" && isSidebarOpen ? '18rem' : '0' }}
         >
           <div className="flex items-center gap-4">
-            {!isSidebarOpen && (
+            {selectedModelKey === "001" && !isSidebarOpen && (
               <button
                 onClick={() => setIsSidebarOpen(true)}
                 className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -355,7 +368,7 @@ export default function ChatPage() {
 
         {/* Input Area */}
         <div className="fixed bottom-0 right-0 p-4 z-40"
-          style={{ left: isSidebarOpen ? '18rem' : '0' }}
+          style={{ left: selectedModelKey === "001" && isSidebarOpen ? '18rem' : '0' }}
         >
           <div className="max-w-6xl mx-auto">
             <div className={`backdrop-blur-xl border-2 rounded-xl px-4 py-3 flex gap-3 items-end transition-all shadow-2xl ${
