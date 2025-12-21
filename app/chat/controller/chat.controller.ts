@@ -25,8 +25,8 @@ export class ChatController {
       // Call the API and get AI response (with web search if turbo mode is on)
       const aiResponse = await chatApi(message, turboMode);
 
-      // Add AI response to store
-      addMessage("ai", aiResponse);
+      // Add AI response to store (extract only the message content)
+      addMessage("ai", aiResponse.message);
     } catch (error) {
       console.error("Failed to send message:", error);
       // Add error message to store

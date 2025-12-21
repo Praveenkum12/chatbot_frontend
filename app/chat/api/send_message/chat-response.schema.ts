@@ -1,7 +1,10 @@
 import { z } from "zod";
 
 // Chat Response Schema (Output)
-export const ChatResponseSchema = z.string();
+export const ChatResponseSchema = z.object({
+  message: z.string(),
+  conversation_id: z.string(),
+});
 
 export type ChatResponse = z.infer<typeof ChatResponseSchema>;
 

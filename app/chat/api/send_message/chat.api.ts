@@ -38,8 +38,8 @@ export const chatApi = async (
       );
     }
 
-    // Parse response text
-    const data = await response.text();
+    // Parse response JSON
+    const data = await response.json();
 
     // Validate and return response
     return parseChatResponse(data);
